@@ -25,8 +25,9 @@ async def recommend_products(request: RecommendationRequest):
 @app.post("/predict/")
 async def predict(file: UploadFile = File(...)):
     try:
-        image = read_imagefile(await file.read())
-        prediction = predict_image(image)
+        image_data = await file.read()
+        image_array = read_imagefile(image_data)
+        prediction = predict_image(image_array)
         return {"prediction": prediction}
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))

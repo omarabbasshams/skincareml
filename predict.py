@@ -1,26 +1,20 @@
 import tensorflow as tf
+from tensorflow.keras.utils import img_to_array, load_img
 import numpy as np
-from PIL import Image
-import io
 
 # Load the trained model
 model = tf.keras.models.load_model('models/model.h5')
 
-def read_imagefile(file) -> Image.Image:
-    """Read and open an image file."""
-    image = Image.open(io.BytesIO(file))
-    return image
+# Function to read and preprocess the image file
+def read_imagefile(file) -> np.array:
+    img = load_img(file, target_size=(224, 224))
+    img_array = img_to_array(img)
+    img_array = np.expand_dims(img_array, axis=0)
+    return img_array
 
-def preprocess_image(image: Image.Image) -> np.ndarray:
-    """Preprocess the image to match the model's input requirements."""
-    image = image.resize((224, 224))  # Ensure the image size matches your model input
-    image = np.array(image) / 255.0  # Normalize the image
-    image = np.expand_dims(image, axis=0)  # Add batch dimension
-    return image
-
-def predict(image: Image.Image) -> int:
-    """Predict the class of the image using the trained model."""
-    preprocessed_image = preprocess_image(image)
-    prediction = model.predict(preprocessed_image)
-    predicted_class = np.argmax(prediction, axis=1)
-    return predicted_class[0]
+# Function to predict the class of the image
+def predict_image(img_array) -> str:
+    prediction = model.predict(img_array)
+    class_indices = {0: 'acne', 1: 'redness', 2: 'wrinkles', 3: 'bags'}
+    predicted_class = class_indices[np.argmax(prediction)]
+    return predicted_class
