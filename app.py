@@ -5,6 +5,12 @@ from predict import predict_image, read_imagefile
 
 app = FastAPI()
 
+from fastapi import FastAPI, HTTPException
+from pydantic import BaseModel
+from recommendation_service import RecommendationService
+
+app = FastAPI()
+
 class RecommendationRequest(BaseModel):
     skin_type: str
     issue: str
@@ -21,6 +27,7 @@ async def recommend_products(request: RecommendationRequest):
         return RecommendationResponse(recommendations=recommendations)
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
+
 
 @app.post("/predict/")
 async def predict(file: UploadFile = File(...)):
