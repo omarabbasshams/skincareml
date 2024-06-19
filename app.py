@@ -1,7 +1,13 @@
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException , File, UploadFile
 from pydantic import BaseModel
 from recommendation_service import get_recommendations
-
+from pydantic import BaseModel
+from typing import Dict
+import tensorflow as tf
+from PIL import Image
+import numpy as np
+from predict import predict, read_imagefile
+from fastapi.responses import JSONResponse
 app = FastAPI()
 
 class RecommendationRequest(BaseModel):
@@ -12,6 +18,17 @@ class RecommendationResponse(BaseModel):
     recommendations: list
 
 
+
+
+class PredictionRequest(BaseModel):
+    answers: Dict[int, str]
+    issue: str
+
+@app.post("/predict/")
+async def predict_image(file: UploadFile = File(...)):
+    image = read_imagefile(await file.read())
+    prediction = predict(image)
+    return JSONResponse(content={"prediction": str(prediction)})
 
 @app.post("/recommend/", response_model=RecommendationResponse)
 async def recommend(request: RecommendationRequest):
